@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+build/
+.qtcreator/
+antlr-*-complete.jar
+antlr4_runtime/
