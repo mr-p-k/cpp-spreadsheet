@@ -16,6 +16,10 @@ Cell::Cell(Sheet& sheet) : impl_(Empty{}), sheet_(sheet) {
 }
 
 void Cell::Set(std::string text) {
+    if (text == GetText()) {
+        return;
+    }
+
     if (text.empty()) {
         impl_ = Empty{};
     } else if (FORMULA_SIGN == text.front()) {
@@ -30,7 +34,7 @@ void Cell::Set(std::string text) {
 }
 
 void Cell::Clear() {
-    impl_ = Empty{};
+    Set("");
 }
 
 void Cell::InvalidateCache() {
@@ -62,7 +66,7 @@ void Cell::ResetCache() {
 Cell::Value Cell::GetValue() const {
     return std::visit(
         Overload{
-            [](const Empty&) { return Value{}; },
+            [](const Empty& e) { return e.GetValue(); },
             [](const Text& t) { return t.GetValue(); },
             [this](const Formula& f) { return f.GetValue(sheet_); },
         },
@@ -71,7 +75,7 @@ Cell::Value Cell::GetValue() const {
 
 std::string Cell::GetText() const {
     return std::visit(Overload{
-                          [](const Empty&) { return std::string{}; },
+                          [](const Empty& e) { return e.GetText(); },
                           [](const Text& t) { return t.GetText(); },
                           [](const Formula& f) { return f.GetText(); },
                       },
@@ -114,6 +118,14 @@ void Cell::SetReferencedCellNode(std::unordered_set<Cell*> cells) {
 
 void Cell::ClearReferencedCellNodes() {
     referenced_cells_.clear();
+}
+
+CellInterface::Value Cell::Empty::GetValue() const {
+    return 0.0;
+}
+
+std::string Cell::Empty::GetText() const {
+    return {};
 }
 
 Cell::Text::Text(std::string value) : value_(std::move(value)) {
