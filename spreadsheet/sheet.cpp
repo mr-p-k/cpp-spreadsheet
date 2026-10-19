@@ -19,6 +19,13 @@ using namespace std::literals;
 
 namespace {
 
+void CheckPosition(Position pos) {
+    if (!pos.IsValid()) {
+        throw InvalidPositionException("Position is out of bounds: " +
+                                       pos.ToString());
+    }
+}
+
 void CorrectErase(int where, int what, std::map<int, std::set<int>>& index) {
     if (auto const kKeyIt = index.find(where); kKeyIt != index.end()) {
         kKeyIt->second.erase(what);
@@ -96,9 +103,7 @@ void Sheet::PrintSheet(std::ostream& out, PrintType type) const {
 }
 
 void Sheet::SetCell(Position pos, std::string text) {
-    if (!pos.IsValid()) {
-        throw InvalidPositionException("invalid position");
-    }
+    CheckPosition(pos);
 
     auto tmp_cell = std::make_unique<Cell>(*this);
     tmp_cell->Set(std::move(text));
@@ -150,9 +155,7 @@ void Sheet::SetCell(Position pos, std::string text) {
 }
 
 const CellInterface* Sheet::GetCell(Position pos) const {
-    if (!pos.IsValid()) {
-        throw InvalidPositionException("invalid position");
-    }
+    CheckPosition(pos);
 
     auto const kCellIt = sheet_.find(pos);
 
@@ -165,9 +168,7 @@ CellInterface* Sheet::GetCell(Position pos) {
 }
 
 void Sheet::ClearCell(Position pos) {
-    if (!pos.IsValid()) {
-        throw InvalidPositionException("invalid position");
-    }
+    CheckPosition(pos);
 
     if (0 < sheet_.erase(pos)) {
         EraseIndexes(pos);
@@ -196,9 +197,7 @@ void Sheet::PrintTexts(std::ostream& output) const {
 }
 
 const Cell* Sheet::GetConcreteCell(Position pos) const {
-    if (!pos.IsValid()) {
-        throw InvalidPositionException("invalid position");
-    }
+    CheckPosition(pos);
 
     const auto kCellIt = sheet_.find(pos);
 
@@ -206,9 +205,8 @@ const Cell* Sheet::GetConcreteCell(Position pos) const {
 }
 
 Cell* Sheet::GetConcreteCell(Position pos) {
-    if (!pos.IsValid()) {
-        throw InvalidPositionException("invalid position");
-    }
+    CheckPosition(pos);
+
     auto [cell_it, is_ok] = sheet_.try_emplace(pos);
 
     if (is_ok) {

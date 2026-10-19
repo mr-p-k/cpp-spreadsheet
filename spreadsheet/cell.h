@@ -15,7 +15,12 @@ class Sheet;
 
 class Cell final : public CellInterface {
 private:
-    class Empty {};
+    class Empty {
+    public:
+        [[nodiscard]] Value GetValue() const;
+
+        [[nodiscard]] std::string GetText() const;
+    };
 
     class Text {
     public:

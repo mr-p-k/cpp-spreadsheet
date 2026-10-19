@@ -175,20 +175,27 @@ public:
             throw FormulaError(FormulaError::Category::Arithmetic);
         }
 
+        const double kLhsValue = lhs_->Evaluate(lookup);
+        const double kRhsValue = rhs_->Evaluate(lookup);
+
         double result = std::nan("");
 
         switch (type_) {
-            case Type{'+'}:
-                result = lhs_->Evaluate(lookup) + rhs_->Evaluate(lookup);
+            case Add:
+                result = kLhsValue + kRhsValue;
                 break;
-            case Type{'-'}:
-                result = lhs_->Evaluate(lookup) - rhs_->Evaluate(lookup);
+            case Subtract:
+                result = kLhsValue - kRhsValue;
                 break;
-            case Type{'*'}:
-                result = lhs_->Evaluate(lookup) * rhs_->Evaluate(lookup);
+            case Multiply:
+                result = kLhsValue * kRhsValue;
                 break;
-            case Type{'/'}:
-                result = lhs_->Evaluate(lookup) / rhs_->Evaluate(lookup);
+            case Divide:
+                if (0.0 == kRhsValue) {
+                    throw FormulaError(FormulaError::Category::Arithmetic);
+                }
+
+                result = kLhsValue / kRhsValue;
                 break;
         }
 
@@ -241,9 +248,9 @@ public:
         }
 
         switch (type_) {
-            case Type::UnaryMinus:
+            case UnaryMinus:
                 return (-1) * operand_->Evaluate(lookup);
-            case Type::UnaryPlus:
+            case UnaryPlus:
                 return operand_->Evaluate(lookup);
             default:
                 throw FormulaError(FormulaError::Category::Arithmetic);
